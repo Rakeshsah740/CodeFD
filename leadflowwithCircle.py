@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Simulation parameters
-Nx, Ny = 400, 400  # Square domain Nx, Ny = 500, 500 
+Nx, Ny = 400, 400  # Square domain
 tau = 0.6          # Relaxation time
 steps = 40001       # Number of iterations
 plot_every = 500    # Plotting interval
@@ -29,13 +29,18 @@ ux = np.zeros((Ny, Nx))  # Initial x-velocity
 uy = np.zeros((Ny, Nx))  # Initial y-velocity
 
 
-# Create obstacle mask (square at 1/4 of Nx and Ny)
-obstacle_size = Nx // 8  # Size of the square obstacle
+# Create circular obstacle
+obstacle_radius = Nx // 8  # Radius of the circular obstacle
 obstacle_x = Nx // 2
 obstacle_y = Ny // 2
-obstacle = np.zeros((Ny, Nx), dtype=bool)
-obstacle[obstacle_y-obstacle_size//2:obstacle_y+obstacle_size//2, 
-         obstacle_x-obstacle_size//2:obstacle_x+obstacle_size//2] = True
+
+# Create grid of coordinates
+x, y = np.arange(Nx), np.arange(Ny)
+X, Y = np.meshgrid(x, y)
+
+# Calculate distance from center
+distance = np.sqrt((X - obstacle_x)**2 + (Y - obstacle_y)**2)
+obstacle = distance <= obstacle_radius
 
 # Create visualization figure
 plt.figure(figsize=(18, 6))
@@ -59,7 +64,6 @@ for it in range(steps):
     F[-1, :, 8] = F[-1, :, 6] + (1/6) * rho_lid * u_top
     
     # Bounce-back for stationary walls (left, right, bottom)
-
     # Bottom wall (y = 0)
     F[0, :, 1] = F[0, :, 5]  # North (1) = South (5)
     F[0, :, 2] = F[0, :, 6]  # Northeast (2) = Southwest (6)
@@ -75,7 +79,7 @@ for it in range(steps):
     F[:, Nx-1, 6] = F[:, Nx-1, 2]  # Southwest (6) = Northeast (2)
     F[:, Nx-1, 8] = F[:, Nx-1, 4]  # Northwest (8) = Southeast (4)
     
-    # Bounce-back for obstacle
+    # Bounce-back for circular obstacle
     for i in range(9):
         F[obstacle, i] = F_pre_collision[obstacle, opposite_indices[i]]
 
@@ -107,7 +111,7 @@ for it in range(steps):
     F += -(1/tau) * (F - Feq)
     
     import os
-    os.makedirs('cavityWithSquare', exist_ok=True)  # Create folder only once at start
+    os.makedirs('cavityWithCircle', exist_ok=True)  # Create folder only once at start
     
     # --- Visualization ---
     if it % plot_every == 0:
@@ -126,7 +130,7 @@ for it in range(steps):
         plt.imshow(ux, cmap='jet', origin='lower')
         plt.colorbar(label='X-velocity (u_x)')
         plt.title(f'X-Velocity Field (Step {it}, Re={Re})')
-        plt.savefig(f'cavityWithSquare/u_x_field_step_{it:01d}.png', dpi=300)
+        plt.savefig(f'cavityWithCircle/u_x_field_step_{it:05d}.png', dpi=300)
         plt.close()
 
         # --- Save Y-Velocity field (u_y)
@@ -134,7 +138,7 @@ for it in range(steps):
         plt.imshow(uy, cmap='jet', origin='lower')
         plt.colorbar(label='Y-velocity (u_y)')
         plt.title(f'Y-Velocity Field (Step {it}, Re={Re})')
-        plt.savefig(f'cavityWithSquare/u_y_field_step_{it:01d}.png', dpi=300)
+        plt.savefig(f'cavityWithCircle/u_y_field_step_{it:05d}.png', dpi=300)
         plt.close()
 
         # --- Save Velocity Magnitude field
@@ -143,7 +147,7 @@ for it in range(steps):
         plt.imshow(vel_mag, cmap='jet', origin='lower')
         plt.colorbar(label='Velocity Magnitude |u|')
         plt.title(f'Velocity Magnitude (Step {it}, Re={Re})')
-        plt.savefig(f'cavityWithSquare/velocity_magnitude_step_{it:01d}.png', dpi=300)
+        plt.savefig(f'cavityWithCircle/velocity_magnitude_step_{it:05d}.png', dpi=300)
         plt.close()
 
         # --- Save Vorticity field
@@ -151,16 +155,15 @@ for it in range(steps):
         plt.imshow(vorticity, cmap='bwr', origin='lower', vmin=-0.2, vmax=0.2)
         plt.colorbar(label='Vorticity')
         plt.title(f'Vorticity Field (Step {it}, Re={Re})')
-        plt.savefig(f'cavityWithSquare/vorticity_field_step_{it:01d}.png', dpi=300)
+        plt.savefig(f'cavityWithCircle/vorticity_field_step_{it:05d}.png', dpi=300)
         plt.close()
-
 
         # --- Save Temperature (density rho)
         plt.figure(figsize=(8,5))
         plt.imshow(rho, cmap='inferno', origin='lower')
         plt.colorbar(label='Temperature (ρ)')
         plt.title(f'Temperature Field (Step {it}, Re={Re})')
-        plt.savefig(f'cavityWithSquare/temperature_step_{it:01d}.png', dpi=300)
+        plt.savefig(f'cavityWithCircle/temperature_step_{it:05d}.png', dpi=300)
         plt.close()
 
         # --- Save X-velocity profile at mid-height
@@ -171,9 +174,8 @@ for it in range(steps):
         plt.ylabel('u_x (velocity in x)')
         plt.title(f'Profile of u_x at y={y_pos} (Step {it}, Re={Re})')
         plt.grid(True)
-        plt.savefig(f'cavityWithSquare/ux_profile_step_{it:01d}.png', dpi=300)
+        plt.savefig(f'cavityWithCircle/ux_profile_step_{it:05d}.png', dpi=300)
         plt.close()
-        
         
         # Create coordinate grid based on actual domain size
         x = np.arange(Nx)
@@ -197,7 +199,6 @@ for it in range(steps):
         plt.xlabel('x')
         plt.ylabel('y')
         plt.title(f'Stream Trace for Re = {Re}')
-        plt.savefig(f'cavityWithSquare/streamlines_step_{it:01d}.png', dpi=300, bbox_inches='tight')
+        plt.savefig(f'cavityWithCircle/streamlines_step_{it:05d}.png', dpi=300, bbox_inches='tight')
         plt.close()
         
-
