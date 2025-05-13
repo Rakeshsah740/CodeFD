@@ -18,9 +18,8 @@ cys = np.array([0, 0, 0, 1,-1, 0, 0, 1, 1,-1,-1, 0, 0, 0, 0, 1,-1, 1,-1])
 czs = np.array([0, 0, 0, 0, 0, 1,-1, 0, 0, 0, 0, 1, 1,-1,-1, 1, 1,-1,-1])
 weights = np.array([1/3] + [1/18]*6 + [1/36]*12)
 
-# ======================
+
 # Initialize Fields
-# ======================
 F   = np.ones((Nz, Ny, Nx, 19))   # distribution functions
 rho = np.ones((Nz, Ny, Nx))       # density
 ux  = np.zeros((Nz, Ny, Nx))      # velocity components
@@ -29,9 +28,8 @@ uz  = np.zeros((Nz, Ny, Nx))
 
 os.makedirs('vtk_output', exist_ok=True)
 
-# ======================
+
 # VTK Export Function
-# ======================
 def export_step(grid, it):
     """
     Write both a .vti file (for ParaView) and
@@ -107,9 +105,8 @@ def export_step(grid, it):
     png.SetInputConnection(w2i.GetOutputPort())
     png.Write()
 
-# ======================
+
 # Main LBM Loop
-# ======================
 for it in range(steps):
     print(f"Step {it+1}/{steps}")
 
@@ -159,7 +156,7 @@ for it in range(steps):
 
     F += -(1/tau)*(F - Feq)
 
-    # 5) Export for ParaView (and optional PNG)
+    # 5) Export for ParaView 
     if it % plot_every == 0 or it == steps-1:
         # Build a VTK grid with scalars & vectors
         grid = vtk.vtkImageData()
@@ -181,4 +178,4 @@ for it in range(steps):
 
         export_step(grid, it)
 
-print("Done!  All .vti (and PNG) files are in vtk_output/ — load them in ParaView for a smooth 3D animation.")
+print("Done!")
