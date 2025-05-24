@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import os
 
 # Simulation parameters
-Nx, Ny = 250, 250
+Nx, Ny = 300, 300
 tau = 0.6
 steps = 5000
 plot_every = 1000
