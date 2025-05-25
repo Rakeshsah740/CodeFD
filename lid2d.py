@@ -1,3 +1,10 @@
+'''   
+    6  2  5
+     \ | /
+    3--0--1
+     / | \
+    7  4  8
+'''
 from lbm_core import *
 from boundaries import apply_boundary_conditions, enforce_velocity_boundaries
 from error import compute_error
