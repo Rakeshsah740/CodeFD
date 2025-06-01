@@ -1,12 +1,13 @@
-'''   
-    6  2  5
-     \ | /
-    3--0--1
-     / | \
-    7  4  8
-'''
+# IMPORTANT:
+# Only one set of functions should be used at a time:
+# - Use `apply_boundary_conditions` and `enforce_velocity_boundaries` for single moving lid (top only).
+# - Use `apply_boundary_conditions2` and `enforce_velocity_boundaries2` for two moving lids (top and bottom).
+# NEVER use both sets in the same simulation loop — they will override each other’s results and lead to incorrect boundary behavior.
+
+
 from lbm_core import *
-from boundaries import apply_boundary_conditions, enforce_velocity_boundaries
+from boundaries import apply_boundary_conditions, enforce_velocity_boundaries    # for top lid moving
+from boundaries import apply_boundary_conditions2, enforce_velocity_boundaries2    # for top and bottom lid moving
 from error import compute_error
 from visualization import visualize_fields
 import matplotlib.pyplot as plt
@@ -15,10 +16,13 @@ import os
 # Simulation parameters
 Nx, Ny = 300, 300
 tau = 0.6
-steps = 5000
-plot_every = 1000
+steps = 50001
+plot_every = 500
 ux_top = 0.2
 uy_top = 0
+ux_bottom = 1*ux_top
+uy_bottom = 0
+
 
 # Initialize fields
 F, rho, ux, uy = initialize(Nx, Ny)
@@ -40,10 +44,12 @@ for it in range(steps):
     F = streaming(F)
 
     # Apply boundaries
-    F = apply_boundary_conditions(F, ux_top, uy_top, Nx, Ny)
+    #F = apply_boundary_conditions(F, ux_top, uy_top)
+    F = apply_boundary_conditions2(F, ux_top, ux_bottom, uy_top, uy_bottom)
     rho, ux, uy = update_macroscopic(F)
-    ux, uy = enforce_velocity_boundaries(ux, uy, ux_top, Nx, Ny)
-
+    #ux, uy = enforce_velocity_boundaries(ux, uy, ux_top)
+    ux, uy = enforce_velocity_boundaries2(ux, uy, ux_top, ux_bottom)
+    
     # Compute and store error
     err, ux_mid_prev, uy_mid_prev = compute_error(ux, uy, ux_mid_prev, uy_mid_prev, Ny, Nx)
     error_history.append(err)
@@ -51,6 +57,7 @@ for it in range(steps):
     if it % plot_every == 0:
         visualize_fields(it, ux, uy, ux_top, tau, Nx, Ny)
 
+        
     # Plot convergence
     if it % 100 == 0:
         ax.clear()
@@ -59,8 +66,9 @@ for it in range(steps):
         ax.set_ylabel('Max centerlines velocity error')
         ax.set_title(f'Step {it}, Error={err:.2e}')
         plt.pause(0.001)
-
+    
     print('step =', it)
 # Finish
 plt.ioff()
 plt.show()
+print('Done')
