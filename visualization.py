@@ -1,8 +1,15 @@
+'''   
+    6  2  5
+     \ | /
+    3--0--1
+     / | \
+    7  4  8
+'''
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-def create_output_folder(folder_name="plot1"):
+def create_output_folder(folder_name="plot"):
     """
     Create output folder if it doesn't exist.
     """
@@ -17,7 +24,7 @@ def compute_vorticity(ux, uy):
     dux_dy = np.gradient(ux, axis=0)
     return duy_dx - dux_dy
 
-def visualize_fields(it, ux, uy, ux_top, tau, Nx, Ny, folder="plot1"):
+def visualize_fields(it, ux, uy, ux_top, tau, Nx, Ny, folder="plot"):
     """
     Save figures of velocity fields, vorticity, profiles, and streamlines.
     """
@@ -30,7 +37,7 @@ def visualize_fields(it, ux, uy, ux_top, tau, Nx, Ny, folder="plot1"):
     
     Re = int(ux_top * Nx / ((2 * tau - 1) / 6))  # Reynolds number
 
-    
+      
     # --- Save X-Velocity field ---
     plt.figure(figsize=(8, 5))
     plt.imshow(ux, cmap='jet', origin='lower', extent=[0, 1, 0, 1])
@@ -99,7 +106,7 @@ def visualize_fields(it, ux, uy, ux_top, tau, Nx, Ny, folder="plot1"):
     plt.grid(True)
     plt.savefig(f'{folder}/ux_profile_vertical_step_{it:04d}.png', dpi=250)
     plt.close()
- 
+    
 
     # --- Streamlines ---
     x = np.arange(Nx)
