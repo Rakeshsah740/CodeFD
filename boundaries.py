@@ -195,4 +195,47 @@ def enforce_velocity_boundaries_couette(ux, uy, ux_top_plate):
 
     return ux, uy
 
+###############################################################################################
+#FlowOverCylinder
+def apply_boundary_conditions_cylinder(F, ux_inlet,uy_inlet):
+    
+    # lef wall 
+    rho_lid = (F[:, 0, 0] + F[:, 0, 2] + F[:, 0, 4] + 
+                2 * (F[:, 0, 3] + F[:, 0, 6] + F[:, 0, 7])) / (1 + uy_inlet)
 
+    # Zou/He
+    F[:, 0, 1] = F[:, 0, 3] + (2/3) * rho_lid * ux_inlet
+    F[:, 0, 5] = F[:, 0, 7] - 0.5*(F[:, 0, 2] - F[:, 0, 4]) + (1/6) * rho_lid * (ux_inlet + 3*uy_inlet)
+    F[:, 0, 8] = F[:, 0, 6] + 0.5*(F[:, 0, 2] - F[:, 0, 4]) + (1/6) * rho_lid * (ux_inlet - 3*uy_inlet)
+    
+   
+    # right wall (periodic)
+    F[:, -1, 3] = F[:, 1, 3]
+    F[:, -1, 6] = F[:, 1, 6]
+    F[:, -1, 7] = F[:, 1, 7]
+  
+    # Top wall (bounce-back)
+    F[-1, :, 4] = F[-1, :, 2]
+    F[-1, :, 7] = F[-1, :, 5]
+    F[-1, :, 8] = F[-1, :, 6]
+
+    # Bottom wall (bounce-back)
+    F[0, :, 2] = F[0, :, 4]
+    F[0, :, 5] = F[0, :, 7]
+    F[0, :, 6] = F[0, :, 8]
+
+
+    return F
+
+def enforce_velocity_boundaries_cylinder(ux, uy, ux_inlet):
+    """
+    Set velocity boundary values explicitly.
+    """
+    # Bottom
+    ux[0, :] = 0 
+    uy[0, :] = 0
+
+    # Top 
+    ux[-1, :] = uy[-1, :] = 0
+    
+    return ux, uy
