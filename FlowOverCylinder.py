@@ -19,7 +19,7 @@ Nx, Ny = 400, 100
 tau = 0.6
 steps = 35001
 plot_every = 200
-ux_inlet = 0.2
+ux_inlet = 0.001
 uy_inlet = 0
 opposite_indices = [0, 3, 4, 1, 2, 7, 8, 5, 6]
 
