@@ -1,7 +1,7 @@
 
 import numpy as np
 
-def compute_error(ux, uy, ux_prev, uy_prev, Ny, Nx, eps=1e-12):
+def compute_error(ux, uy, ux_mid_prev, uy_mid_prev, Ny, Nx, eps=1e-12):
     """
     Compute maximum relative error in velocity at center lines.
     """
